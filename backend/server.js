@@ -15,6 +15,12 @@ const connectDB = require('./config/database');
 
 // Import Routes
 const healthRoutes = require('./routes/healthRoutes');
+const authRoutes = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const scholarshipRoutes = require('./routes/scholarshipRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const cron = require('node-cron');
+const { runFetch } = require('./services/scholarshipFetcherService');
 
 // Import Middleware
 const notFoundMiddleware = require('./middleware/notFoundMiddleware');
@@ -25,6 +31,16 @@ const app = express();
 // 3. Connect to MongoDB
 connectDB();
 
+// Initialize automatic fetch cron job
+const intervalDays = process.env.SCHOLARSHIP_FETCH_INTERVAL_DAYS || 7;
+// Note: node-cron allows */X for day of month. Alternatively, if it's 7, '0 0 * * 0' is every Sunday.
+// We'll use a dynamic expression: '0 0 */INTERVAL * *'
+const cronExpression = `0 0 */${intervalDays} * *`;
+cron.schedule(cronExpression, async () => {
+    console.log(`[Scheduler] Running automatic scholarship fetch (Every ${intervalDays} days)...`);
+    await runFetch();
+});
+
 // 4. Initialize Express (done above)
 
 // 5. Register middleware
@@ -34,6 +50,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // 6. Register routes
 app.use('/api/health', healthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/scholarships', scholarshipRoutes);
+app.use('/api/admin/scholarships', adminRoutes);
 
 // 7. Register 404 middleware
 app.use(notFoundMiddleware);
