@@ -18,7 +18,10 @@ const healthRoutes = require('./routes/healthRoutes');
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const scholarshipRoutes = require('./routes/scholarshipRoutes');
+const applicationRoutes = require('./routes/applicationRoutes');
+const dataMonitorRoutes = require('./routes/dataMonitorRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 const cron = require('node-cron');
 const { runFetch } = require('./services/scholarshipFetcherService');
 
@@ -53,7 +56,10 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/scholarships', scholarshipRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/data-monitor', dataMonitorRoutes);
 app.use('/api/admin/scholarships', adminRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // 7. Register 404 middleware
 app.use(notFoundMiddleware);

@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const Scholarship = require('../models/Scholarship');
 const ScholarshipFetchJob = require('../models/ScholarshipFetchJob');
 const ScholarshipSourceStatus = require('../models/ScholarshipSourceStatus');
+const ScholarshipChangeHistory = require('../models/ScholarshipChangeHistory');
 const sourcesConfig = require('../config/scholarshipSources');
 const bcmbcmwFetcher = require('./sources/bcmbcmwFetcher');
 
@@ -158,9 +159,37 @@ const runFetch = async (options = {}) => {
 
                     if (existing) {
                         const safeUpdate = getSafeUpdateObj(record);
+                        
+                        // Detect Changes
+                        const changedFields = [];
+                        const prevValues = {};
+                        const newValues = {};
+                        
+                        const fieldsToCheck = ['deadline', 'amount', 'description', 'eligibility', 'applyUrl', 'status'];
+                        
+                        fieldsToCheck.forEach(field => {
+                            if (safeUpdate[field] !== undefined && String(safeUpdate[field]) !== String(existing[field])) {
+                                changedFields.push(field);
+                                prevValues[field] = existing[field];
+                                newValues[field] = safeUpdate[field];
+                            }
+                        });
+
                         safeUpdate.lastUpdated = new Date();
+                        
                         if (!dryRun) {
                             await Scholarship.updateOne({ _id: existing._id }, { $set: safeUpdate });
+                            
+                            if (changedFields.length > 0) {
+                                await ScholarshipChangeHistory.create({
+                                    scholarshipId: existing._id,
+                                    sourceName: source.name,
+                                    changedFields,
+                                    previousValues: prevValues,
+                                    newValues: newValues,
+                                    detectedAt: new Date()
+                                });
+                            }
                         }
                         sourceUpdated++;
                         summary.recordsUpdated++;

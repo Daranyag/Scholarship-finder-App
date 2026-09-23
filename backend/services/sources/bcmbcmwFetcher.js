@@ -101,7 +101,20 @@ const bcmbcmwFetcher = async (source) => {
                 amount: 'Up to Rs. 2.00 lakh per year',
                 eligibilityText: 'Native of Tamil Nadu. BC/MBC/DNC. Pursuing UG/PG in IIT, IIM, NIT, IIIT. Annual family income should not exceed Rs.2.50 Lakh.',
                 sourceUrl: source.baseUrl,
-                sourceName: source.name
+                sourceName: source.name,
+                additionalRequirements: [{
+                    question: 'Are you pursuing UG/PG in IIT, IIM, NIT, IIIT or Central Universities?',
+                    type: 'yes_no',
+                    sourceRequirement: 'Pursuing UG/PG in IIT, IIM, NIT, IIIT.',
+                    sourceText: 'Pursuing UG/PG Courses in Government of India institutions.',
+                    requiredValue: true
+                }, {
+                    question: 'Are you a native of Tamil Nadu?',
+                    type: 'yes_no',
+                    sourceRequirement: 'Native of Tamil Nadu.',
+                    sourceText: 'Scholarships are sanctioned to the Tamil Nadu students...',
+                    requiredValue: true
+                }]
             }));
         }
 

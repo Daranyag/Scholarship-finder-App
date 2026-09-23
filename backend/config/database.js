@@ -7,7 +7,13 @@ const connectDB = async () => {
             return false;
         }
 
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI, {
+            maxPoolSize: 50, // Increase max connection pool size
+            minPoolSize: 10, // Maintain a minimum number of connections
+            socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+            serverSelectionTimeoutMS: 10000, // Keep trying to send operations for 10s
+            family: 4, // Use IPv4, skip trying IPv6
+        });
         console.log('MongoDB successfully connected.');
         return true;
     } catch (err) {

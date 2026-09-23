@@ -24,6 +24,14 @@ const scholarshipSchema = new mongoose.Schema({
         educationLevel: [String],
         gender: { type: String, default: 'Any' }
     },
+    additionalRequirements: [{
+        question: String,
+        type: { type: String, enum: ['yes_no', 'single_choice', 'multiple_choice', 'number', 'text', 'date'] },
+        options: [String],
+        sourceRequirement: String,
+        sourceText: String,
+        requiredValue: mongoose.Schema.Types.Mixed
+    }],
     deadline: {
         type: String,
         required: true
@@ -60,6 +68,13 @@ const scholarshipSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true
+});
+
+scholarshipSchema.index({
+    title: 'text',
+    organization: 'text',
+    description: 'text',
+    category: 'text'
 });
 
 module.exports = mongoose.model('Scholarship', scholarshipSchema);

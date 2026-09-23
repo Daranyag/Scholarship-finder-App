@@ -33,7 +33,24 @@ const userSchema = new mongoose.Schema({
     stream: { type: String },
     institution: { type: String },
     yearOfStudy: { type: String },
-    district: { type: String }
+    district: { type: String },
+    savedScholarships: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Scholarship'
+    }],
+    languagePreference: {
+        type: String,
+        default: 'en'
+    },
+    notificationPreferences: {
+        scholarshipUpdates: { type: Boolean, default: true },
+        newScholarshipAlerts: { type: Boolean, default: true },
+        deadlineReminders: { type: Boolean, default: true },
+        applicationUpdates: { type: Boolean, default: true },
+        documentExpiryAlerts: { type: Boolean, default: true },
+        eligibilityChanges: { type: Boolean, default: true },
+        systemNotifications: { type: Boolean, default: true }
+    }
 }, {
     timestamps: true
 });

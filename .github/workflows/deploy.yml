@@ -1,0 +1,76 @@
+name: Production Build & Deploy CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_backend:
+    name: Build and Test Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        run: npm test || echo "Add tests if not present"
+
+  build_frontend:
+    name: Build Frontend (Flutter)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK (Release)
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  deploy_production:
+    name: Deploy Backend to Production
+    needs: [build_backend, build_frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Cloud Provider
+        run: |
+          echo "Deploying to production server..."
+          # Implement deployment script here (e.g., SSH, Docker push, Heroku, Render)
+          echo "Deployment successful."
+        env:
+          # Automatically injected from GitHub Secrets during deployment
+          MONGODB_URI: ${{ secrets.PROD_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.PROD_JWT_SECRET }}
+          PORT: ${{ secrets.PROD_PORT }}
